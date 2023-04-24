@@ -3,12 +3,12 @@
 
 <div align="center">
     
-[![npm-publish](https://github.com/aikosiadotcom/automaton/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/aikosiadotcom/automaton/actions/workflows/npm-publish.yml)
-![Branches](https://raw.githubusercontent.com/aikosiadotcom/automaton/main/badges/coverage-branches.svg?raw=true)
-![Functions](https://raw.githubusercontent.com/aikosiadotcom/automaton/main/badges/coverage-functions.svg?raw=true)
-![Lines](https://raw.githubusercontent.com/aikosiadotcom/automaton/main/badges/coverage-lines.svg?raw=true)
-![Statements](https://raw.githubusercontent.com/aikosiadotcom/automaton/main/badges/coverage-statements.svg?raw=true)
-![Jest coverage](https://raw.githubusercontent.com/aikosiadotcom/automaton/main/badges/coverage-jest%20coverage.svg?raw=true)
+[![npm-publish](https://github.com/aikosiadotcom/automaton-daemon/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/aikosiadotcom/automaton-daemon/actions/workflows/npm-publish.yml)
+![Branches](https://raw.githubusercontent.com/aikosiadotcom/automaton-daemon/main/badges/coverage-branches.svg?raw=true)
+![Functions](https://raw.githubusercontent.com/aikosiadotcom/automaton-daemon/main/badges/coverage-functions.svg?raw=true)
+![Lines](https://raw.githubusercontent.com/aikosiadotcom/automaton-daemon/main/badges/coverage-lines.svg?raw=true)
+![Statements](https://raw.githubusercontent.com/aikosiadotcom/automaton-daemon/main/badges/coverage-statements.svg?raw=true)
+![Jest coverage](https://raw.githubusercontent.com/aikosiadotcom/automaton-daemon/main/badges/coverage-jest%20coverage.svg?raw=true)
 
 </div>
 
