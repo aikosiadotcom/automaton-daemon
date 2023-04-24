@@ -1,4 +1,5 @@
 name: npm-publish
+permissions: write-all
 on:
   push:
     branches:

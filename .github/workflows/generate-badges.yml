@@ -1,4 +1,5 @@
 name: generate-badges
+permissions: write-all
 on: 
   push:
     branches:
