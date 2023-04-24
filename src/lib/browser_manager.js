@@ -2,7 +2,7 @@ import { chromium, devices } from 'playwright';
 import pf from 'portfinder';
 import { publicIpv4 } from 'public-ip';
 import httpProxy from 'http-proxy';
-import { Ability } from '@aikosia/automaton-core';
+import { Ability } from '@aikosia/automaton';
 import ProfileManager from './profile_manager.js';
 import * as dotenv from 'dotenv';
 dotenv.config();
