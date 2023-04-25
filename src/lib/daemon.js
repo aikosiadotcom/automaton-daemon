@@ -1,4 +1,4 @@
-import {Runtime, Ability} from '@aikosia/automaton';
+import {Runtime, Ability} from '@aikosia/automaton-core';
 import BrowserManager from './browser_manager.js';
 import express from 'express';
 import BrowserRouter from '../routes/browser.js';

@@ -1,6 +1,6 @@
 {
   "name": "@aikosia/automaton-daemon",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "a daemon who manage browser automaton in server",
   "main": "./src/index.js",
   "repository": {
@@ -34,7 +34,6 @@
   "author": "firman",
   "license": "MIT",
   "dependencies": {
-    "@aikosia/automaton": "^0.7.0",
     "dotenv": "^16.0.3",
     "env-paths": "^3.0.0",
     "express": "^4.18.2",
@@ -46,6 +45,9 @@
     "portfinder": "^1.0.32",
     "public-ip": "^6.0.1",
     "read-pkg": "^8.0.0"
+  },
+  "peerDependencies": {
+    "@aikosia/automaton-core": "0.9.x"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
