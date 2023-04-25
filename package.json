@@ -1,7 +1,7 @@
 {
   "name": "@aikosia/automaton-daemon",
   "version": "0.9.1",
-  "description": "a daemon who manage browser automaton in server",
+  "description": "a daemon which manage browser automaton in server",
   "main": "./src/index.js",
   "repository": {
     "type": "git",
