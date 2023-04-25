@@ -2,10 +2,10 @@ import { chromium, devices } from 'playwright';
 import pf from 'portfinder';
 import { publicIpv4 } from 'public-ip';
 import httpProxy from 'http-proxy';
-import { Ability } from '@aikosia/automaton-core';
+import { Ability, System } from '@aikosia/automaton-core';
 import ProfileManager from './profile_manager.js';
 import * as dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ path: System.getPath("env") });
 
 const pm = new ProfileManager()
 const _ports = process.env.AUTOMATON_DEV_PROTOCOL_RANGE.split(":");
