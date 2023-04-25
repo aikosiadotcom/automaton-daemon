@@ -1,13 +1,23 @@
 import {Runtime, Ability} from '@aikosia/automaton';
 import BrowserManager from './browser_manager.js';
 import express from 'express';
-import BrowserRouter from '../route/browser.js';
+import BrowserRouter from '../routes/browser.js';
+import RestRouter from '../routes/rest.js';
 
 let instance = null;
 
 class Daemon extends Ability{
     constructor(){
         super({"key":"daemon"});
+
+        /**error handling */
+        process.once('uncaughtException',  (err) => {
+            this.logger.log("error","uncaughtException",err.stack);
+        });
+
+        process.once('unhandledRejection',  (err) => {
+            this.logger.log("error","unhandledRejection",err.stack);
+        });
     }
 
     static getInstance() {
@@ -28,15 +38,18 @@ class Daemon extends Ability{
     
             /**load bot */
             this.loader = new Runtime();
-            await this.loader.run();
-    
+            this.automata = await this.loader.run();
+
             /**web server */
             const app = express();
             app.use(express.json());
+            app.use(express.urlencoded({ extended: false }));
             app.use("/browser",BrowserRouter({browserManager:this.bm}));
-        
+            app.use("/rest",RestRouter({automata:this.automata.filter(value=>{
+                return value.manifest.template == 'rest';
+            })}));
             app.use((err, req, res, next) => {
-                res.status(500).send(err.data);
+                res.status(500).send(err.toString());
             });
         
             this.server = app.listen(process.env.AUTOMATON_DAEMON_PORT, () => {

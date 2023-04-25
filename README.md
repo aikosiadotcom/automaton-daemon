@@ -1,5 +1,5 @@
 
-<h1 align="center">AUTOMATON DAEMON<br/><div><h6><i>a daemon who manage browser automaton in server</i></h6></div></h1>
+<h1 align="center">AUTOMATON DAEMON<br/><div><h6><i>A Daemon which Manage Browser For Automaton</i></h6></div></h1>
 
 <div align="center">
     
