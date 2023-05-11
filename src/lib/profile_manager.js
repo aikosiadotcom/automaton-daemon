@@ -1,58 +1,78 @@
 import path from 'path';
 import dir from 'node-directories';
-import json from "jsonfile";
 import fsExtra from 'fs-extra';
-import {System} from '@aikosia/automaton-core';
+import {App} from '@aikosia/automaton-core';
 
-class ProfileManager{
-    
-    static getDefaultManifest(data = {}){
-        return {
-            "version":"1.0.0",
-            "autoStart":true,
-            ...data
-        }
+/**
+ * @typedef ProfileManager~Profile
+ * @property {string} name - name of the profile
+ * @property {string} root - absolute path of the profile
+ */
+
+/**
+ * To manage profile folder
+ * @category API
+ * @extends external:App
+ */
+class ProfileManager extends App{
+    constructor(){
+        super({key:"Daemon",childKey:"ProfileManager"});
     }
 
+    /**
+     * Create a profile folder
+     * @param {string} name 
+     * @throws if the profile folder with same name exists.
+     */
     async create(name){
-        const newProfile = path.join(await this.getPath("profile"),name);
+        const newProfile = path.join(this.explorer.path["profile"],name);
         if(await fsExtra.exists(newProfile)){
-            console.error(`${name} exists`);
-            return;
+            throw new Error(`'${name}' exists. Please remove it first at '${newProfile}'`);
         }
 
         await fsExtra.ensureDir(newProfile,0o2777);
-        await json.writeFile(path.join(newProfile,"automaton.json"),ProfileManager.getDefaultManifest({
-            // autoStart:option.autoStart
-        }));
-
-        console.log("profile created successfully");
     }
 
-    async get(){
-        const absPath = await this.getPath("profile");
-        const lists = dir(absPath);
+    /**
+     * To get metadata about profiles
+     * @param {string} [name=""] - if name is empty then will return all
+     * @returns {Promise<Array.<ProfileManager~Profile>>}
+     */
+    async get(name = ""){
+        const root = this.explorer.path["profile"];
+        const lists = dir(root);
         const profiles = [];
         for(let i=0;i<lists.length;i++){
             const val = lists[i];
             profiles.push({
-                id:val,
-                absPath:path.join(absPath,val),
-                manifest:await json.readFile(path.join(absPath,val,"automaton.json"))
+                name:val,
+                root:path.join(root,val)
             });
         }
 
-        //default profile
-        if(lists.length === 0){
-            await this.create("default");
+        //make sure there's always a default profile
+        if((profiles.filter((val)=>val.name==='default')).length == 0){
+            return await this.create('default');
+        }
+
+        if(name.length){
+            return profiles.filter((val)=>val.name == name);
         }
 
         return profiles;
     }
 
-    
-    async getPath(folderName = ""){
-        return System.getPath(folderName);
+    /**
+     * To delete a profile
+     * @param {string} name 
+     */
+    async delete(name){
+        const profiles = await this.get(name);
+        if(profiles.length){
+            await fsExtra.rmdir(profiles[0].root);
+        }else{
+            throw new Error(`${name} not found.`);
+        }
     }
 }
 

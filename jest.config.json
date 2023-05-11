@@ -1,0 +1,45 @@
+{
+  "transform": {},
+  "collectCoverage": true,
+  "collectCoverageFrom": [
+    "./src/**/*.js",
+    "!./src/**/*.d.ts"
+  ],
+  "coverageReporters": [
+    "clover",
+    "json",
+    "lcov",
+    "text", 
+    "json-summary"
+  ],
+  "reporters": [
+    "default",
+    [
+      "jest-html-reporters",
+      {
+        "publicPath": "./coverage",
+        "filename": "report.html",
+        "openReport": false
+      }
+    ]
+  ],
+  "testPathIgnorePatterns": [
+    "<rootDir>/src/mocks",
+    "<rootDir>/src/errors",
+    "<rootDir>/src/constant.js",
+    "<rootDir>/src/index.js",
+    "<rootDir>/src/runtimes/index.js",
+    "<rootDir>/src/runtimes/manifest.js",
+    "<rootDir>/src/runtimes/bot_loader/interface_package_manager.js"
+  ],
+  "coveragePathIgnorePatterns": [
+    "<rootDir>/src/mocks",
+    "<rootDir>/src/errors",
+    "<rootDir>/src/constant.js",
+    "<rootDir>/src/index.js",
+    "<rootDir>/src/runtimes/index.js",
+    "<rootDir>/src/runtimes/manifest.js",
+    "<rootDir>/src/runtimes/bot_loader/interface_package_manager.js"
+  ],
+  "coverageProvider": "v8"
+}

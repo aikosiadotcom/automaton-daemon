@@ -3,9 +3,14 @@ import {Router} from 'express';
 const BrowserRouter = function({browserManager}){
     const router = Router();
 
-    router.get('/:id', async (req, res, next) => {
+    router.get('/:name', async (req, res, next) => {
         try{
-            return res.send(await browserManager.get(req.params.id,["url"]));
+            const instance = await browserManager.get(req.params.name);
+            if(instance === undefined){
+                throw new Error(`this bot have a runtime exceptions`)
+            }
+
+            return res.send(instance.url);
         }catch(err){
             next(err);
         }

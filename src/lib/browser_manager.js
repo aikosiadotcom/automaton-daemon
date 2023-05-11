@@ -1,79 +1,163 @@
-import { chromium, devices } from 'playwright';
+import { chromium } from 'playwright';
 import pf from 'portfinder';
 import { publicIpv4 } from 'public-ip';
 import httpProxy from 'http-proxy';
-import { Ability, System } from '@aikosia/automaton-core';
-import ProfileManager from './profile_manager.js';
-import * as dotenv from 'dotenv';
-dotenv.config({ path: System.getPath("env") });
+import { App } from '@aikosia/automaton-core';
+import ProfileManager from '#lib/profile_manager';
+import extend from "extend";
 
-const pm = new ProfileManager()
-const _ports = process.env.AUTOMATON_DEV_PROTOCOL_RANGE.split(":");
+/**
+ * @external BrowserContext
+ * @see https://playwright.dev/docs/api/class-browsercontext
+ */
 
-pf.setBasePort(_ports[0]);
-pf.setHighestPort(_ports[1]);
+/**
+ * @external App 
+ * @see https://github.com/aikosiadotcom/automaton-core
+ */
 
+/**
+ * @external HttpProxy
+ * @see https://www.npmjs.com/package/http-proxy?activeTab=readme
+ */
 
-class BrowserManager extends Ability{
+/**
+ * @typedef BrowserManager~CreatedProfile
+ * @property {external:BrowserContext} instance 
+ * @property {number} port
+ * @property {string} url 
+ * @property {object} proxy 
+ * @property {number} proxy.port 
+ * @property {external:HttpProxy} proxy.instance
+ */
+
+/**
+ * To manage browsers
+ * 
+ * @mermaid
+ * graph TD;
+ *  A-->B;
+ * 
+ * @category API
+ * @extends external:App
+ */
+class BrowserManager extends App{
+    /**
+     * to store created browser profiles
+     * @type {Object}
+     */
     #browsers = {}
+    /**
+     * instance of profile manager
+     * @type {ProfileManager}
+     */
+    #profileManager = new ProfileManager();
 
-    constructor() {
-        super({key:"BrowserManager"})
+    /**
+     * @param {object} [options] 
+     * @param {object} [options.proxy] 
+     * @param {object} [options.proxy.port]
+     * @param {number} [options.proxy.port.min=49152]
+     * @param {number} [options.proxy.port.max=65535]
+     * @param {object} [option.profile]
+     * @param {string} [option.profile.name=""]
+     */
+    constructor(options) {
+        options = extend(true,{
+            proxy:{
+                port:{
+                    min:49152,
+                    max:65535
+                }
+            },
+            profile:{
+                name:""
+            },
+            expose:true
+        },options);
+        super({key:"Daemon",childKey:"BrowserManager"});
+
+        this.options = options;
+
+        pf.setBasePort(options.proxy.port.min);
+        pf.setHighestPort(options.proxy.port.max);
     }
 
-    async start() {
-        const ip = await publicIpv4();
-        let profiles = await pm.get();
+    /**
+     * run the browser manager
+     */
+    async run() {
+        try{
+            
+            this.profiler.start("run");
+            await this.event.emit("start");
 
-        for (let i = 0; i < profiles.length; i++) {
-            this.logger.log("info","profiles", profiles);
-            if (profiles[i].manifest.autoStart) {
+            const ip = this.options.expose ? await publicIpv4() : "localhost";
+            let profiles = await this.#profileManager.get(this.options.profile.name);
+            for (let i = 0; i < profiles.length; i++) {
                 const port = await pf.getPortPromise();
-                this.#browsers[profiles[i].id] = {
+                this.#browsers[profiles[i].name] = {
                     instance: null,
-                    port: port,
                     url: null,
-                    proxyPort: null,
-                    proxyServer: null
+                    port: port,
+                    proxy:{
+                        instance:null,
+                        port:null
+                    },
+                    error:null
                 };
-                this.#browsers[profiles[i].id].instance = await chromium.launchPersistentContext(profiles[i].absPath, {
+                this.#browsers[profiles[i].name].instance = await chromium.launchPersistentContext(profiles[i].root, {
                     headless: false,
-                    ...devices['Desktop Chrome'],
                     args: [
-                        // `--remote-debugging-address=0.0.0.0`,//not working if not headless
-                        `--remote-debugging-port=${this.#browsers[profiles[i].id].port}`,
-                        // '--start-maximized'
+                        `--remote-debugging-port=${this.#browsers[profiles[i].name].port}`,
                     ]
                 });
-
+    
                 const proxyPort = await pf.getPortPromise();
-                this.#browsers[profiles[i].id].proxyPort = proxyPort;
-                this.#browsers[profiles[i].id].url = `http://${ip}:${proxyPort}`;
-                this.#browsers[profiles[i].id].proxyServer = httpProxy.createServer({
-                    target: `ws://localhost:${port}`,
-                    ws: true,
-                    localAddress: ip
-                }).listen(proxyPort);
+                this.#browsers[profiles[i].name].url = `http://${ip}:${this.options.expose ? proxyPort : port}`;
+
+                if(this.options.expose){
+                    this.#browsers[profiles[i].name].proxy.port = proxyPort;
+                    this.#browsers[profiles[i].name].proxy.instance = httpProxy.createServer({
+                        target: `ws://localhost:${port}`,
+                        ws: true,
+                        localAddress: ip
+                    }).listen(proxyPort);
+                }
+            }
+            this.logger.log("verbose",`loaded profiles: ${profiles.length}`, profiles);
+            
+        }catch(err){
+            await this.event.emit("error",err);
+        }finally{
+            this.profiler.stop("run");
+            await this.event.emit("end");
+        }
+    }
+
+    /**
+     * To get created browser profile
+     * @param {string} [name="default"] - profile name
+     * @returns {undefined | BrowserManager~CreatedProfile}
+     */
+    get(name = "default") {
+        return this.#browsers[name];
+    }
+
+    async stop(){
+        for(const key in this.#browsers){
+            const instanceBrowser = this.#browsers[key].instance;
+            if(instanceBrowser){
+                await instanceBrowser.close();
+            }
+
+            if(this.options.expose){
+                const instanceProxyServer = this.#browsers[key].proxy.instance;
+                if(instanceProxyServer){
+                    await instanceProxyServer.close();
+                }
             }
         }
-    }
-
-    async stop() {
-        for (let [key, value] of Object.entries(this.#browsers)) {
-            await value.instance.close();
-            await value.proxyServer.close();
-        }
-
-        this.#browsers = {};
-    }
-
-    async restart() {
-        await this.stop();
-        await this.start();
-    }
-
-    get(id, key = "instance") {
-        return this.#browsers[id][key];
     }
 }
 

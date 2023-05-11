@@ -1,4 +1,4 @@
-name: generate-badges
+name: test
 permissions: write-all
 on: 
   push:
@@ -15,13 +15,13 @@ jobs:
     - name: Setup Node Js
       uses: actions/setup-node@v3
       with:
-          node-version: '18'
+          node-version: '18.12.1'
 
     - name: Install dependencies
       run: npm install --verbose
 
     - name: Tests
-      run: npm run test-ci
+      run: npm run test -- --ci
       
     - name: Generating coverage badges
       uses: jpb06/jest-badges-action@latest

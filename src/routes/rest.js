@@ -1,20 +1,20 @@
 import {Router} from 'express';
 
-const RestRouter = function({automata}){
+const RestRouter = function({runtime}){
     const router = Router();
 
-    router.post('/:id', async (req, res, next) => {
+    router.post('/:name', async (req, res, next) => {
         try{
-            const pluginId = req.params.id;
+            const name = req.params.name;
             const {method, args} = req.body;
 
-            const project = automata.filter((val)=>val.id == pluginId);
+            const project = runtime.filter((val)=>val.name == name);
             if(!project.length){
-                throw new Error(`package "${pluginId}" not found`);
+                throw new Error(`package "${name}" not found`);
             }
 
             if(!project[0].instance[method]){
-                throw new Error(`method "${method}" not found on instance of "${pluginId}"`);
+                throw new Error(`method "${method}" not found on instance of "${name}"`);
             }
             
             return res.send(await project[0].instance[method](args));
