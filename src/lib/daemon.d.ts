@@ -10,14 +10,20 @@ declare class Daemon extends App {
         host?: string;
         port?: number;
     });
+    options: {
+        host?: string;
+        port?: number;
+    };
     host: string;
-    port: number;
+    port: string | number;
     run(): Promise<void>;
     /**browser management*/
     browserManager: BrowserManager;
     /**load bot */
     runtime: Runtime;
     server: any;
+    stop(): Promise<void>;
+    reload(): Promise<void>;
 }
 import { App } from '@aikosia/automaton-core';
 import BrowserManager from '#lib/browser_manager';

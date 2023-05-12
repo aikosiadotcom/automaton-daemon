@@ -35,4 +35,9 @@ declare class ProfileManager {
      * @returns {Promise<Array.<ProfileManager~Profile>>}
      */
     get(name?: string): Promise<Array<ProfileManager>>;
+    /**
+     * To delete a profile
+     * @param {string} name
+     */
+    delete(name: string): Promise<void>;
 }

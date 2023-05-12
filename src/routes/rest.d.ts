@@ -1,4 +1,2 @@
 export default RestRouter;
-declare function RestRouter({ automata }: {
-    automata: any;
-}): any;
+declare function RestRouter(runtime: any): any;

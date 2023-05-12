@@ -51,6 +51,8 @@ declare class BrowserManager {
      * @param {object} [options.proxy.port]
      * @param {number} [options.proxy.port.min=49152]
      * @param {number} [options.proxy.port.max=65535]
+     * @param {object} [option.profile]
+     * @param {string} [option.profile.name=""]
      */
     constructor(options?: {
         proxy?: {
@@ -60,6 +62,14 @@ declare class BrowserManager {
             };
         };
     });
+    options: {
+        proxy?: {
+            port?: {
+                min?: number;
+                max?: number;
+            };
+        };
+    };
     /**
      * run the browser manager
      */
@@ -70,5 +80,6 @@ declare class BrowserManager {
      * @returns {undefined | BrowserManager~CreatedProfile}
      */
     get(name?: string): undefined | BrowserManager;
+    stop(): Promise<void>;
     #private;
 }
