@@ -14,7 +14,7 @@ class Daemon extends App{
      */
     constructor(options){
         options = extend(true,{
-            host:"http://localhost",
+            host:"",
             port:process.env.AUTOMATON_DAEMON_PORT ?? 3000,
             browser:{
                 profile:{
@@ -27,8 +27,8 @@ class Daemon extends App{
         },options);
         super({"key":"Daemon","childKey":"Daemon"});
         this.options = options;
-        this.host = options.host;
-        this.port = options.port;
+        this.host = options.host == "" ? "http://localhost" : options.host;
+        this.port = options.port == "" ? (process.env.AUTOMATON_DAEMON_PORT ?? 3000) : options.port
     }
 
     async run(){
@@ -37,6 +37,9 @@ class Daemon extends App{
             await this.event.emit("start");
             /**browser management*/
             this.browserManager = new BrowserManager(this.options.browser);
+            this.browserManager.event.on("error",(err)=>{
+                this.event.emit("error",err);
+            });
             await this.browserManager.run();
     
             /**load bot */
@@ -50,7 +53,7 @@ class Daemon extends App{
             app.use(express.json());
             app.use(express.urlencoded({ extended: false }));
             app.use("/browser",BrowserRouter({browserManager:this.browserManager}));
-            app.use("/rest",RestRouter({runtime:this.runtime}));
+            app.use("/rest",RestRouter(this.runtime));
             app.use((err, req, res, next) => {
                 res.status(500).send(err.toString());
             });
@@ -60,6 +63,7 @@ class Daemon extends App{
                 await this.runtime.run();
             });
         }catch(err){
+            this.logger.log("error","exception",err);
             await this.event.emit('error',err);
         }finally{
             this.profiler.stop("run");
@@ -72,7 +76,7 @@ class Daemon extends App{
         await this.server.close();
     }
 
-    async reloadRuntime(){
+    async reload(){
         await this.runtime.run();
     }
 }

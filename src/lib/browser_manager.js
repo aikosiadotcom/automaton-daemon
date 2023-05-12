@@ -1,10 +1,14 @@
-import { chromium } from 'playwright';
+import { devices } from 'playwright';
+import {chromium} from 'playwright-extra';
 import pf from 'portfinder';
 import { publicIpv4 } from 'public-ip';
 import httpProxy from 'http-proxy';
 import { App } from '@aikosia/automaton-core';
 import ProfileManager from '#lib/profile_manager';
 import extend from "extend";
+import stealth from "puppeteer-extra-plugin-stealth";
+
+chromium.use(stealth());
 
 /**
  * @external BrowserContext
@@ -108,9 +112,12 @@ class BrowserManager extends App{
                 };
                 this.#browsers[profiles[i].name].instance = await chromium.launchPersistentContext(profiles[i].root, {
                     headless: false,
+                    ...devices['Desktop Chromium'],
+                    viewport:null,
                     args: [
                         `--remote-debugging-port=${this.#browsers[profiles[i].name].port}`,
-                    ]
+                        `--start-maximized`
+                    ],
                 });
     
                 const proxyPort = await pf.getPortPromise();
@@ -126,8 +133,8 @@ class BrowserManager extends App{
                 }
             }
             this.logger.log("verbose",`loaded profiles: ${profiles.length}`, profiles);
-            
         }catch(err){
+            this.logger.log("error","exception",err);
             await this.event.emit("error",err);
         }finally{
             this.profiler.stop("run");
